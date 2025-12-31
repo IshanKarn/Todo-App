@@ -1,62 +1,184 @@
 {% extends "base.html" %}
-{% block heading %}My Tasks{% endblock %}
+{% block heading %}{% endblock %}
 
 {% block content %}
 
-<!-- CREATE TASK -->
-<h3>Create Task</h3>
-<form method="post">
-  {% csrf_token %}
-  
-  <input name="title" placeholder="Title" required><br><br>
-  <textarea name="description" placeholder="Description"></textarea><br><br>
-  <input type="date" name="due_date"><br><br>
+<style>
+/* ---------- Layout Utilities ---------- */
+.task-container {
+  max-width: 1000px;
+  margin: auto;
+}
 
-  <button>Create Task</button>
-</form>
+.card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
 
-<hr>
+.row {
+  display: flex;
+  align-items: center;
+  gap: 20px;                /* main horizontal spacing */
+  flex-wrap: wrap;
+}
 
-<!-- TASK LIST -->
-<h3>Your Tasks</h3>
+.col {
+  flex: 1;
+  margin-right: 20px;
+  min-width: 200px;         /* prevents cramped inputs */
+}
 
-<ul>
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+textarea {
+  resize: vertical;
+  margin-right: 20px;
+}
+
+.card-body {
+  padding-right: 20px;
+}
+
+button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #222;
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;      /* prevents button wrapping */
+}
+
+button.secondary {
+  background: #777;
+}
+
+button.danger {
+  background: #c0392b;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;              /* tighter but clean on mobile */
+  }
+
+  .actions {
+    justify-content: flex-start;
+    min-width: auto;
+  }
+}
+</style>
+
+
+<div class="task-container">
+
+  <!-- ================= CREATE TASK ================= -->
+   <h3>Create Task</h3>
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+
+      <!-- Row 1 -->
+      <div class="row">
+        <div class="col">
+          <input name="title" placeholder="Title" required>
+        </div>
+        <div class="col">
+          <input type="date" name="due_date">
+        </div>
+        <div class="actions">
+          <button>Create</button>
+        </div>
+      </div>
+
+      <!-- Row 2 -->
+      <div style="margin-top:10px;">
+        <div class="card-body">
+            <textarea name="description" placeholder="Description"></textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ================= TASK LIST ================= -->
+  <h3>Your Tasks</h3>
+
   {% for task in tasks %}
-    <li style="margin-bottom:15px;">
+    <div class="card">
 
-      <!-- UPDATE TASK -->
-      <form method="post" action="/tasks/update/{{ task.id }}/">
-        {% csrf_token %}
+  <!-- UPDATE TASK -->
+  <div class="row">
+    <form method="post" action="/tasks/update/{{ task.id }}/" class="row" style="flex:1;">
+      {% csrf_token %}
 
+      <div class="col">
         <input name="title" value="{{ task.title }}" required>
-        <br>
+      </div>
 
-        <textarea name="description">{{ task.description }}</textarea>
-        <br>
-
+      <div class="col">
         <select name="status">
           <option value="pending" {% if task.status == "pending" %}selected{% endif %}>Pending</option>
           <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
         </select>
+      </div>
 
-        <button>Update</button>
-      </form>
+      <div class="col">
+        <input type="date" name="due_date" value="{{ task.due_date }}" required>
+      </div>
 
-      <!-- DELETE TASK -->
-      <form
-        action="/tasks/delete/{{ task.id }}/"
-        method="post"
-        style="display:inline;"
-        onsubmit="return confirm('Are you sure you want to delete this task?');"
-      >
-        {% csrf_token %}
-        <button style="margin-top:5px;">Delete</button>
-      </form>
+      <div class="actions">
+        <button class="secondary">Update</button>
+      </div>
+    </form>
 
-    </li>
+    <!-- DELETE BUTTON -->
+    <form
+      action="/tasks/delete/{{ task.id }}/"
+      method="post"
+      onsubmit="return confirm('Are you sure you want to delete this task?');"
+      class="actions"
+    >
+      {% csrf_token %}
+      <button class="danger">Delete</button>
+    </form>
+  </div>
+
+  <!-- DESCRIPTION ROW -->
+  <div style="margin-top:10px;">
+    <form method="post" action="/tasks/update/{{ task.id }}/">
+      {% csrf_token %}
+      <div class="card-body">
+        <textarea name="description">{{ task.description }}</textarea>
+      </div>
+    </form>
+  </div>
+
+</div>
+
   {% empty %}
-    <li>No tasks yet.</li>
+    <p>No tasks yet.</p>
   {% endfor %}
-</ul>
+
+</div>
 
 {% endblock %}

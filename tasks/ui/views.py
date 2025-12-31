@@ -57,8 +57,7 @@ def tasks_view(request):
     
     return render(
         request,
-        "tasks/tasks.html",
-        {"tasks": tasks},
+        "tasks/tasks.html"
     )
 
 def update_task_view(request, task_id):
@@ -75,6 +74,7 @@ def update_task_view(request, task_id):
         "title": request.POST.get("title"),
         "description": request.POST.get("description"),
         "status": request.POST.get("status"),
+        "due_date": request.POST.get("due_date"),
     }
 
     requests.put(
