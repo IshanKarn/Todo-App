@@ -4,14 +4,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db import connection,transaction
 
-from auth_app.permissions import IsJWTAuthenticated
+from auth_app.api.permissions import IsJWTAuthenticated
 from auth_app.authentication import JWTAuthentication
 
 import random
 from datetime import datetime, timedelta
 from django.core.mail import send_mail
 
-from .utils import (
+from auth_app.utils import (
     create_access_token, create_refresh_token,
     verify_password, hash_password,
     is_valid_email
@@ -207,9 +207,6 @@ class PasswordResetAPI(APIView):
     permission_classes = [IsJWTAuthenticated]
 
     def put(self, request):
-        from .utils import hash_password
-        from django.db import connection
-
         user_id = request.user["user_id"]
         new_password = request.data.get("password")
 

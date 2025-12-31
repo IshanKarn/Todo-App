@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from auth_app.permissions import IsJWTAuthenticated
+from auth_app.api.permissions import IsJWTAuthenticated
 from auth_app.authentication import JWTAuthentication
 
 class TaskAPI(APIView):

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}ToDo App{% endblock %}</title>
+  <style>
+    body { font-family: Arial; margin: 40px; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
+</head>
+<body>
+
+{% if request.COOKIES.access_token %}
+  <form action="/logout" method="post" style="float:right;">
+    {% csrf_token %}
+    <button>Logout</button>
+  </form>
+{% endif %}
+
+<h2>{% block heading %}{% endblock %}</h2>
+
+{% block content %}{% endblock %}
+
+</body>
+</html>
