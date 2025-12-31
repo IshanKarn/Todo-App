@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'auth_app',
+    "drf_spectacular",
+
+    # 'auth_app',
+    "auth_app.apps.AuthAppConfig",
     'tasks',
 ]
 
@@ -196,4 +199,17 @@ LOGGING = {
             "propagate": False,
         },
     },
+}
+
+# Swagger configs
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "ToDo App API",
+    "DESCRIPTION": "JWT-based ToDo API using Django, DRF, and Raw SQL",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

@@ -19,8 +19,39 @@ from auth_app.utils import (
 
 from auth_app.logger import auth_api_logger
 
-class RegisterAPI(APIView):
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
+class RegisterAPI(APIView):
+    @extend_schema(
+        operation_id="auth_register",
+        summary="Register user",
+        description="Register a new user and send email verification OTP",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "username": {"type": "string"},
+                    "email": {"type": "string", "format": "email"},
+                    "password": {"type": "string"},
+                },
+                "required": ["username", "email", "password"],
+            }
+        },
+        responses={
+            200: OpenApiResponse(
+                description="OTP sent to email",
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                        "action": {"type": "string"},
+                    },
+                },
+            ),
+            400: OpenApiResponse(description="Validation error"),
+            409: OpenApiResponse(description="User already exists"),
+        },
+    )
     def post(self, request):
         username = request.data.get("username")
         email = request.data.get("email")
@@ -168,7 +199,25 @@ class RegisterAPI(APIView):
 
 
 class VerifyEmailOTP(APIView):
-
+    @extend_schema(
+        operation_id="auth_verify_email",
+        summary="Verify email OTP",
+        description="Verify email using OTP",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "format": "email"},
+                    "otp": {"type": "string"},
+                },
+                "required": ["email", "otp"],
+            }
+        },
+        responses={
+            200: OpenApiResponse(description="Email verified successfully"),
+            400: OpenApiResponse(description="Invalid or expired OTP"),
+        },
+    )
     def post(self, request):
         email = request.data.get("email")
         otp = request.data.get("otp")
@@ -213,7 +262,35 @@ class VerifyEmailOTP(APIView):
 
 
 class LoginAPI(APIView):
-
+    @extend_schema(
+        operation_id="auth_login",
+        summary="Login",
+        description="Login using username or email and password",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "username_or_email": {"type": "string"},
+                    "password": {"type": "string"},
+                },
+                "required": ["username_or_email", "password"],
+            }
+        },
+        responses={
+            200: OpenApiResponse(
+                description="JWT tokens issued",
+                response={
+                    "type": "object",
+                    "properties": {
+                        "access": {"type": "string"},
+                        "refresh": {"type": "string"},
+                    },
+                },
+            ),
+            401: OpenApiResponse(description="Invalid credentials"),
+            403: OpenApiResponse(description="Email not verified"),
+        },
+    )
     def post(self, request):
         username_or_email = request.data.get("username_or_email")
         password = request.data.get("password")
@@ -314,6 +391,22 @@ class LogoutAPI(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJWTAuthenticated]
 
+    @extend_schema(
+        operation_id="auth_logout",
+        summary="Logout",
+        description="Logout user (client-side JWT deletion)",
+        responses={
+            200: OpenApiResponse(
+                description="Logged out successfully",
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                    },
+                },
+            )
+        },
+    )
     def post(self, request):
         """
         Stateless logout.
@@ -330,7 +423,24 @@ class LogoutAPI(APIView):
 
     
 class ForgotPasswordAPI(APIView):
-
+    @extend_schema(
+        operation_id="auth_forgot_password",
+        summary="Forgot password",
+        description="Send OTP for password reset",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "format": "email"},
+                },
+                "required": ["email"],
+            }
+        },
+        responses={
+            200: OpenApiResponse(description="OTP sent to email"),
+            404: OpenApiResponse(description="Email not found"),
+        },
+    )
     def post(self, request):
         email = request.data.get("email")
 
@@ -376,7 +486,26 @@ class ForgotPasswordAPI(APIView):
         return Response({"message": "OTP sent"})
 
 class ResetPasswordOTP(APIView):
-
+    @extend_schema(
+        operation_id="auth_reset_password",
+        summary="Reset password",
+        description="Reset password using OTP",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "email": {"type": "string", "format": "email"},
+                    "otp": {"type": "string"},
+                    "new_password": {"type": "string"},
+                },
+                "required": ["email", "otp", "new_password"],
+            }
+        },
+        responses={
+            200: OpenApiResponse(description="Password reset successful"),
+            400: OpenApiResponse(description="Invalid or expired OTP"),
+        },
+    )
     def post(self, request):
         email = request.data.get("email")
         otp = request.data.get("otp")
@@ -421,7 +550,23 @@ class ResetPasswordOTP(APIView):
 class DeleteUserCascadeAPI(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJWTAuthenticated]
-
+    @extend_schema(
+        operation_id="auth_delete_user",
+        summary="Delete user",
+        description="Delete authenticated user and all related tasks",
+        responses={
+            200: OpenApiResponse(
+                description="User and tasks deleted",
+                response={
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                    },
+                },
+            ),
+            401: OpenApiResponse(description="Unauthorized"),
+        },
+    )
     def delete(self, request):
         user_id = request.user["user_id"]
         auth_api_logger.info(

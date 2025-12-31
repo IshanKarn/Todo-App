@@ -8,10 +8,34 @@ from auth_app.authentication import JWTAuthentication
 
 from tasks.logger import tasks_api_logger
 
+from drf_spectacular.utils import extend_schema, OpenApiResponse
+
 class TaskAPI(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJWTAuthenticated]
 
+    @extend_schema(
+        operation_id="tasks_list",
+        summary="List tasks",
+        description="List all tasks ordered by nearest due date",
+        responses={
+            200: OpenApiResponse(
+                response={
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "integer"},
+                            "title": {"type": "string"},
+                            "description": {"type": "string"},
+                            "due_date": {"type": "string", "format": "date"},
+                            "status": {"type": "string"},
+                        },
+                    },
+                }
+            )
+        },
+    )
     def get(self, request):
         """Retrieve logged-in user's tasks"""
         user_id = request.user["user_id"]
@@ -44,7 +68,24 @@ class TaskAPI(APIView):
 
         return Response(tasks)
 
-
+    @extend_schema(
+        operation_id="tasks_create",
+        summary="Create task",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "description": {"type": "string"},
+                    "due_date": {"type": "string", "format": "date"},
+                },
+                "required": ["title"],
+            }
+        },
+        responses={
+            201: OpenApiResponse(description="Task created"),
+        },
+    )
     def post(self, request):
         """Create task for logged-in user"""
         user_id = request.user["user_id"]
@@ -78,6 +119,11 @@ class TaskDetailAPI(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJWTAuthenticated]
 
+    @extend_schema(
+        operation_id="tasks_retrieve",
+        summary="Retrieve task",
+        responses={200: OpenApiResponse(description="Task details")},
+    )
     def get(self, request, task_id):
         user_id = request.user["user_id"]
 
@@ -107,7 +153,21 @@ class TaskDetailAPI(APIView):
             "status": row[4],
         })
 
-
+    @extend_schema(
+        operation_id="tasks_update",
+        summary="Update task",
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string"},
+                    "description": {"type": "string"},
+                    "status": {"type": "string"},
+                },
+            }
+        },
+        responses={200: OpenApiResponse(description="Task updated")},
+    )
     def put(self, request, task_id):
         user_id = request.user["user_id"]
         data = request.data
@@ -138,7 +198,11 @@ class TaskDetailAPI(APIView):
 
         return Response({"message": "Task updated"})
 
-
+    @extend_schema(
+        operation_id="tasks_delete",
+        summary="Delete task",
+        responses={200: OpenApiResponse(description="Task deleted")},
+    )
     def delete(self, request, task_id):
         user_id = request.user["user_id"]
 
