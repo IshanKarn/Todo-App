@@ -90,6 +90,9 @@ OpenAPI schema (JSON): http://127.0.0.1:8000/api/schema/
 Authorization: Bearer <access_token>
 ```
 
+### Postman collection
+Collection file in root directory: Todo App.postman_collection.json
+
 ### Running Tests
 
 Run all tests
