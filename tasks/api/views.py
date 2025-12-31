@@ -6,6 +6,8 @@ from rest_framework import status
 from auth_app.api.permissions import IsJWTAuthenticated
 from auth_app.authentication import JWTAuthentication
 
+from tasks.logger import tasks_api_logger
+
 class TaskAPI(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsJWTAuthenticated]
@@ -36,6 +38,10 @@ class TaskAPI(APIView):
             for row in rows
         ]
 
+        tasks_api_logger.info(
+            f"TASKS_RETRIVED | user_id={user_id}"
+        )
+
         return Response(tasks)
 
 
@@ -62,6 +68,10 @@ class TaskAPI(APIView):
                 ],
             )
 
+        tasks_api_logger.info(
+            f"TASK_CREATED | user_id={user_id} title={data.get('title')}"
+        )
+
         return Response({"message": "Task created"}, status=status.HTTP_201_CREATED)
 
 class TaskDetailAPI(APIView):
@@ -84,6 +94,10 @@ class TaskDetailAPI(APIView):
 
         if not row:
             return Response({"error": "Task not found"}, status=404)
+
+        tasks_api_logger.info(
+            f"TASK_RETRIVED | user_id={user_id}"
+        )
 
         return Response({
             "id": row[0],
@@ -117,6 +131,10 @@ class TaskDetailAPI(APIView):
 
             if cursor.rowcount == 0:
                 return Response({"error": "Task not found"}, status=404)
+        
+        tasks_api_logger.info(
+            f"TASK_UPDATED | user_id={user_id} task_id={task_id}"
+        )
 
         return Response({"message": "Task updated"})
 
@@ -132,6 +150,10 @@ class TaskDetailAPI(APIView):
 
             if cursor.rowcount == 0:
                 return Response({"error": "Task not found"}, status=404)
+
+        tasks_api_logger.warning(
+            f"TASK_DELETED | user_id={user_id} task_id={task_id}"
+        )
 
         return Response({"message": "Task deleted"})
 
