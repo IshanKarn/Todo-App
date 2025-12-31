@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+{% block heading %}Login{% endblock %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  
+  <label>Username or Email</label><br>
+  <input name="username_or_email" required><br><br>
+
+  <label>Password</label><br>
+  <input type="password" name="password" required><br><br>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <button type="submit">Login</button>
+  <a href="/auth/forgot-password">Forgot Password?</a>
+
+</form>
+{% endblock %}

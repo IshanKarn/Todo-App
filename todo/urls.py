@@ -18,8 +18,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from .views import home
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+
+    path("", home, name="home"),
+
     path("api/auth/", include("auth_app.api.urls")),
+    path("auth/", include("auth_app.ui.urls")),
+
     path("api/tasks/", include("tasks.api.urls")),
+    path("tasks/", include("tasks.ui.urls")),
 ]

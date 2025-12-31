@@ -26,15 +26,91 @@ class RegisterAPI(APIView):
         password = request.data.get("password")
 
         if not username or not email or not password:
-            return Response({"error": "All fields required"}, status=400)
-        
-        if not is_valid_email(email):
-            return Response({"error": "Invalid email format"}, status=400)
+            return Response(
+                {"error": "All fields required"},
+                status=400,
+            )
 
-        otp = str(random.randint(100000, 999999))
-        expiry = datetime.utcnow() + timedelta(minutes=5)
+        if not is_valid_email(email):
+            return Response(
+                {"error": "Invalid email format"},
+                status=400,
+            )
 
         with connection.cursor() as cursor:
+            # Check email status
+            cursor.execute(
+                """
+                SELECT id, is_email_verified
+                FROM users
+                WHERE email = %s
+                """,
+                [email],
+            )
+            email_row = cursor.fetchone()
+
+            # CASE — Email exists
+            if email_row:
+                user_id, is_email_verified = email_row
+
+                # CASE — Email verified - Login
+                if is_email_verified:
+                    return Response(
+                        {
+                            "error": "Email already registered",
+                            "email_verified": True,
+                            "action": "login",
+                        },
+                        status=409,
+                    )
+
+                # CASE — Email exists but NOT verified → resend OTP
+                otp = str(random.randint(100000, 999999))
+                expiry = datetime.utcnow() + timedelta(minutes=5)
+
+                cursor.execute(
+                    """
+                    INSERT INTO password_otps (user_id, otp, expires_at)
+                    VALUES (%s, %s, %s)
+                    """,
+                    [user_id, otp, expiry],
+                )
+
+                send_mail(
+                    "Verify your email",
+                    f"Your verification OTP is {otp}. Valid for 5 minutes.",
+                    None,
+                    [email],
+                )
+
+                return Response(
+                    {
+                        "message": "Email already registered but not verified",
+                        "email_verified": False,
+                        "action": "verify_email",
+                    },
+                    status=200,
+                )
+
+            # Case - Username exists
+            cursor.execute(
+                "SELECT 1 FROM users WHERE username = %s",
+                [username],
+            )
+            username_row = cursor.fetchone()
+            if username_row:
+                return Response(
+                    {
+                        "error": "Username already exists"
+                    },
+                    status=409,
+                )
+            
+            # CASE — New user registration
+            
+            otp = str(random.randint(100000, 999999))
+            expiry = datetime.utcnow() + timedelta(minutes=5)
+
             cursor.execute(
                 """
                 INSERT INTO users (username, email, password)
@@ -60,7 +136,14 @@ class RegisterAPI(APIView):
             [email],
         )
 
-        return Response({"message": "OTP sent to email"})
+        return Response(
+            {
+                "message": "OTP sent to email",
+                "action": "verify_email",
+            },
+            status=200,
+        )
+
 
 class VerifyEmailOTP(APIView):
 

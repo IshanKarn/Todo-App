@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block heading %}My Tasks{% endblock %}
+
+{% block content %}
+
+<form method="post">
+  {% csrf_token %}
+  <input name="title" placeholder="Task title" required>
+  <button>Add Task</button>
+</form>
+
+<ul>
+  {% for task in tasks %}
+    <li>
+      {{ task.title }} — {{ task.status }}
+
+      <form action="/tasks/delete/{{ task.id }}/" method="post" style="display:inline">
+        {% csrf_token %}
+        <button>Delete</button>
+      </form>
+    </li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

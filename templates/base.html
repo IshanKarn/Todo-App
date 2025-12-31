@@ -3,23 +3,75 @@
 <head>
   <title>{% block title %}ToDo App{% endblock %}</title>
   <style>
-    body { font-family: Arial; margin: 40px; }
+    body { 
+        font-family: Arial; 
+        margin: 0; 
+        padding: 0;
+        background: #f7f7f7;
+    }
+
+    header {
+        background: #222;
+        color: #fff;
+        padding: 15px 30px;
+    }
+
+    header a {
+        color: #fff;
+        margin-right: 15px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    header a:hover {
+        text-decoration: underline;
+    }
+
+    main {
+        padding: 40px;
+        min-height: calc(100vh - 140px);
+    }
+
+    footer {
+        background: #222;
+        color: #ccc;
+        text-align: center;
+        padding: 15px;
+        font-size: 14px;
+    }
+
     .error { color: red; }
     .success { color: green; }
   </style>
 </head>
 <body>
 
-{% if request.COOKIES.access_token %}
-  <form action="/logout" method="post" style="float:right;">
-    {% csrf_token %}
-    <button>Logout</button>
-  </form>
-{% endif %}
+<!-- Navbar -->
+<header>
+  <a href="/">ToDo</a>
+  <a href="/tasks/">Tasks</a>
 
-<h2>{% block heading %}{% endblock %}</h2>
+  {% if request.COOKIES.access_token %}
+    <form action="/auth/logout/" method="post" style="display:inline;">
+      {% csrf_token %}
+      <button style="margin-left:15px;">Logout</button>
+    </form>
+  {% else %}
+    <a href="/auth/register/">Register</a>
+    <a href="/auth/login/">Login</a>
+  {% endif %}
+</header>
 
-{% block content %}{% endblock %}
+<!-- Page Content -->
+<main>
+  <h2>{% block heading %}{% endblock %}</h2>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer>
+  © {{ now|date:"Y" }} ToDo App · Built with Django
+</footer>
 
 </body>
 </html>
