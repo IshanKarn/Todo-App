@@ -1,6 +1,6 @@
-# 📝 Django ToDo App (Raw SQL + JWT + OTP)
+# 📝 ToDo App
 
-ToDo application built using Django + Django REST Framework.
+ToDo application built using Django, DRF, SQL, JWT, OTP.
 
 ### 📁 Project Structure
 ```text
