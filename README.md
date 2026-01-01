@@ -1,8 +1,9 @@
-📝 Django ToDo App (Raw SQL + JWT + OTP)
+# 📝 Django ToDo App (Raw SQL + JWT + OTP)
 
 ToDo application built using Django + Django REST Framework.
 
-📁 Project Structure
+### 📁 Project Structure
+```text
 todo_app_django/
 │
 ├── auth_app/          # Authentication (JWT, OTP, Email) APIs + UI
@@ -10,9 +11,12 @@ todo_app_django/
 ├── templates/         # Shared templates (base.html) + index.html
 ├── manage.py
 ├── requirements.txt
-└── README.md
+├── db.sqlite3
+├── README.md
+└── .env
+```
 
-🚀 Project Setup
+### 🚀 Project Setup
 
 ### Clone Repository
 ```bash
@@ -40,6 +44,20 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
+
+### Create .env file to store secrets
+Create .env file in root directory
+Copy and paste environment variables from .env.example file 
+Update values of variables (refer below for maif config)
+
+### Mail config
+Setup google app password
+Visit https://myaccount.google.com/apppasswords
+Write App Name - Todo
+Click on Create
+Copy generated app password
+Set app password as EMAIL_HOST_PASSWORD value in .env file
+Set gmail as value of EMAIL_HOST_USER in .env file
 
 ### Database Setup (SQLite)
 
@@ -83,6 +101,7 @@ Password reset via OTP
 ### Swagger API Documentation
 
 Swagger UI (OpenAPI 3): http://127.0.0.1:8000/api/docs/
+
 OpenAPI schema (JSON): http://127.0.0.1:8000/api/schema/
 
 ### JWT supported via Authorize button:
