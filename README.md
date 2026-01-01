@@ -1,6 +1,8 @@
 # 📝 ToDo App
 
-ToDo application built using Django, DRF, SQL, JWT, OTP.
+ToDo application built using Django, DRF, SQL. 
+JWT and OTP based authentication.
+Swagger docs and tests included.
 
 ### 📁 Project Structure
 ```text
